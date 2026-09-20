@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
@@ -14,6 +14,7 @@ export const FloatingPhotoCard = ({
 }) => {
   const cardGroup = useRef();
   const [texture, setTexture] = useState(null);
+  const [aspectRatio, setAspectRatio] = useState(0.75); // default portrait 3:4
   const { viewport } = useThree();
   const isMobile = viewport.width < 5.5;
 
@@ -26,6 +27,10 @@ export const FloatingPhotoCard = ({
         tex.generateMipmaps = true;
         tex.minFilter = THREE.LinearMipMapLinearFilter;
         setTexture(tex);
+        if (tex.image && tex.image.width && tex.image.height) {
+          const naturalAspect = tex.image.width / tex.image.height;
+          setAspectRatio(naturalAspect);
+        }
       },
       undefined,
       (err) => {
@@ -49,6 +54,27 @@ export const FloatingPhotoCard = ({
     );
   }, [memory]);
 
+  // Compute exact dimensions so photo is never cropped or distorted
+  const { photoW, photoH, frameW, frameH } = useMemo(() => {
+    const maxW = isMobile ? 1.9 : 2.2;
+    const maxH = isMobile ? 2.4 : 2.7;
+
+    let w = maxW;
+    let h = w / aspectRatio;
+
+    if (h > maxH) {
+      h = maxH;
+      w = h * aspectRatio;
+    }
+
+    return {
+      photoW: w,
+      photoH: h,
+      frameW: w + 0.2,
+      frameH: h + 0.35
+    };
+  }, [aspectRatio, isMobile]);
+
   // Elevation and flight animations
   useEffect(() => {
     if (isRevealed && cardGroup.current) {
@@ -57,10 +83,10 @@ export const FloatingPhotoCard = ({
       cardGroup.current.scale.set(0.05, 0.05, 0.05);
       cardGroup.current.rotation.set(0, 0, 0);
 
-      // Target position: positioned significantly higher in viewport so caption never overlaps the photo!
-      const targetY = isMobile ? 3.3 : 3.0;
-      const targetZ = isMobile ? 2.2 : 2.2;
-      const targetScale = isMobile ? 0.75 : 0.88;
+      // Target position: positioned at a comfortable distance so entire photo is visible without zoom
+      const targetY = isMobile ? 2.8 : 2.6;
+      const targetZ = isMobile ? 0.6 : 0.5;
+      const targetScale = isMobile ? 0.9 : 1.0;
 
       gsap.to(cardGroup.current.position, {
         x: 0,
@@ -116,7 +142,7 @@ export const FloatingPhotoCard = ({
   useFrame((state) => {
     if (isRevealed && !isFlyingToSky && cardGroup.current) {
       const t = state.clock.getElapsedTime();
-      const baseY = isMobile ? 3.3 : 3.0;
+      const baseY = isMobile ? 2.8 : 2.6;
       cardGroup.current.position.y = baseY + Math.sin(t * 1.5) * 0.05;
       cardGroup.current.rotation.y = Math.sin(t * 0.8) * 0.05;
     }
@@ -128,7 +154,7 @@ export const FloatingPhotoCard = ({
     <group ref={cardGroup}>
       {/* Photo Frame Backing Plate */}
       <mesh position={[0, 0, -0.04]}>
-        <boxGeometry args={[2.5, 3.3, 0.06]} />
+        <boxGeometry args={[frameW, frameH, 0.06]} />
         <meshStandardMaterial
           color="#fef08a"
           metalness={0.8}
@@ -140,7 +166,7 @@ export const FloatingPhotoCard = ({
 
       {/* Outer Glow Border Frame */}
       <mesh position={[0, 0, 0]}>
-        <boxGeometry args={[2.42, 3.22, 0.05]} />
+        <boxGeometry args={[frameW - 0.05, frameH - 0.05, 0.05]} />
         <meshStandardMaterial
           color="#ffffff"
           roughness={0.1}
@@ -148,9 +174,9 @@ export const FloatingPhotoCard = ({
         />
       </mesh>
 
-      {/* Main Photograph Plane */}
-      <mesh position={[0, 0.1, 0.04]}>
-        <planeGeometry args={[2.2, 2.8]} />
+      {/* Main Photograph Plane with True Native Aspect Ratio */}
+      <mesh position={[0, 0.08, 0.04]}>
+        <planeGeometry args={[photoW, photoH]} />
         {texture ? (
           <meshBasicMaterial map={texture} side={THREE.DoubleSide} />
         ) : (
@@ -158,9 +184,9 @@ export const FloatingPhotoCard = ({
         )}
       </mesh>
 
-      {/* Frame Bottom Label Accent */}
-      <mesh position={[0, -1.4, 0.04]}>
-        <planeGeometry args={[2.2, 0.25]} />
+      {/* Frame Bottom Accent Ribbon */}
+      <mesh position={[0, 0.08 - photoH / 2 - 0.1, 0.04]}>
+        <planeGeometry args={[photoW, 0.14]} />
         <meshStandardMaterial color="#3b0764" roughness={0.4} />
       </mesh>
     </group>
