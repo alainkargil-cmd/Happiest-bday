@@ -57,16 +57,16 @@ export const FloatingPhotoCard = ({
       cardGroup.current.scale.set(0.05, 0.05, 0.05);
       cardGroup.current.rotation.set(0, 0, 0);
 
-      // Target position: positioned higher up in viewport so dialog at bottom NEVER covers it!
-      const targetY = isMobile ? 2.8 : 2.5;
-      const targetZ = isMobile ? 2.2 : 2.0;
-      const targetScale = isMobile ? 0.8 : 0.95;
+      // Target position: positioned significantly higher in viewport so caption never overlaps the photo!
+      const targetY = isMobile ? 3.3 : 3.0;
+      const targetZ = isMobile ? 2.2 : 2.2;
+      const targetScale = isMobile ? 0.75 : 0.88;
 
       gsap.to(cardGroup.current.position, {
         x: 0,
         y: targetY,
         z: targetZ,
-        duration: 2.0,
+        duration: 1.8,
         ease: "power3.out",
         onComplete: () => {
           if (onRevealFinish) onRevealFinish();
@@ -116,8 +116,8 @@ export const FloatingPhotoCard = ({
   useFrame((state) => {
     if (isRevealed && !isFlyingToSky && cardGroup.current) {
       const t = state.clock.getElapsedTime();
-      const baseY = isMobile ? 2.8 : 2.5;
-      cardGroup.current.position.y = baseY + Math.sin(t * 1.5) * 0.06;
+      const baseY = isMobile ? 3.3 : 3.0;
+      cardGroup.current.position.y = baseY + Math.sin(t * 1.5) * 0.05;
       cardGroup.current.rotation.y = Math.sin(t * 0.8) * 0.05;
     }
   });

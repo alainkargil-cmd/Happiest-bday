@@ -114,24 +114,24 @@ export const GiftMemoryOverlay = ({
 
       {/* Active Memory Caption at bottom - positioned completely below 3D photo */}
       {revealingMemory && !isFlyingToSky && (
-        <div className="fixed bottom-20 inset-x-0 flex justify-center px-4 pointer-events-auto">
+        <div className="fixed bottom-14 sm:bottom-16 inset-x-0 flex justify-center px-4 pointer-events-auto">
           <motion.div
-            initial={{ opacity: 0, y: 25, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="glass-panel p-4 sm:p-5 rounded-2xl border border-amber-300/30 text-center max-w-md w-full shadow-[0_15px_40px_rgba(0,0,0,0.6)]"
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className="glass-panel p-3.5 sm:p-4 rounded-xl border border-amber-300/30 text-center max-w-sm w-full shadow-[0_15px_35px_rgba(0,0,0,0.6)] backdrop-blur-md"
           >
-            <div className="flex items-center justify-center gap-1.5 text-[11px] text-amber-300 font-cinzel tracking-wider uppercase mb-1">
-              <Sparkles className="w-3 h-3" />
+            <div className="flex items-center justify-center gap-1 text-[10px] text-amber-300 font-cinzel tracking-wider uppercase mb-0.5">
+              <Sparkles className="w-2.5 h-2.5" />
               <span>{revealingMemory.date || "Cherished Memory"}</span>
             </div>
 
-            <h3 className="text-lg sm:text-2xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-amber-200 to-purple-200 mb-1">
+            <h3 className="text-base sm:text-xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-amber-200 to-purple-200 mb-0.5">
               {revealingMemory.title}
             </h3>
 
-            <p className="text-xs sm:text-sm font-cormorant italic text-purple-100 font-normal leading-snug mb-3.5 px-1 line-clamp-2 sm:line-clamp-none">
+            <p className="text-xs font-cormorant italic text-purple-100 font-normal leading-tight mb-2.5 px-1 line-clamp-2">
               "{revealingMemory.caption}"
             </p>
 
@@ -140,7 +140,7 @@ export const GiftMemoryOverlay = ({
               variant="gold"
               size="sm"
               onClick={onContinueJourney}
-              className="w-full sm:w-auto"
+              className="w-full text-xs py-2"
             >
               {birthdayConfig.narrative.scene4.continueBtn}
             </MagicalButton>
