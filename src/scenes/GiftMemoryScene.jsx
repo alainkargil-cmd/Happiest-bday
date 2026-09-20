@@ -1,11 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GiftBox } from '../components/3d/GiftBox';
 import { FloatingPhotoCard } from '../components/3d/FloatingPhotoCard';
 import { MemorySky } from '../components/3d/MemorySky';
 import { MagicalButton } from '../components/ui/MagicalButton';
 import { birthdayConfig } from '../config/birthdayConfig';
-import { audioManager } from '../utils/audioManager';
 import { Sparkles } from 'lucide-react';
 
 // 3D components for inside Canvas
@@ -56,7 +55,7 @@ export const GiftMemory3D = ({
           isRevealed={true}
           isFlyingToSky={isFlyingToSky}
           skyTarget={[
-            (collectedMemories.length - memories.length / 2) * 3,
+            (collectedMemories.length - memories.length / 2) * 2.8,
             12,
             -10
           ]}
@@ -79,70 +78,75 @@ export const GiftMemoryOverlay = ({
   const memories = birthdayConfig.memories || [];
 
   return (
-    <div className="fixed inset-0 z-20 flex flex-col items-center justify-between py-10 pointer-events-none px-4">
+    <div className="fixed inset-0 z-20 pointer-events-none">
       {/* Top Header info */}
-      <div className="glass-panel px-6 py-2.5 rounded-full border border-white/10 flex items-center gap-3">
-        <Sparkles className="w-4 h-4 text-amber-300 animate-spin" style={{ animationDuration: '8s' }} />
-        <span className="font-cinzel text-xs md:text-sm text-purple-200">
-          Memory Gifts: <strong className="text-amber-300 font-bold">{collectedMemories.length} / {memories.length}</strong>
-        </span>
+      <div className="fixed top-5 inset-x-0 flex justify-center px-4">
+        <div className="glass-panel px-5 py-2 rounded-full border border-white/10 flex items-center gap-2 text-xs sm:text-sm">
+          <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-spin" style={{ animationDuration: '8s' }} />
+          <span className="font-cinzel text-purple-200">
+            Memories: <strong className="text-amber-300 font-bold">{collectedMemories.length} / {memories.length}</strong>
+          </span>
+        </div>
       </div>
 
       {/* Hover Hint when no gift is open */}
       {!revealingMemory && (
-        <AnimatePresence>
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            className="glass-panel px-8 py-4 rounded-2xl border border-white/15 text-center max-w-lg mb-12 shadow-2xl"
-          >
-            <h2 className="text-xl md:text-2xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-amber-200 mb-1">
-              {birthdayConfig.narrative.scene4.title}
-            </h2>
-            <p className="text-xs md:text-sm font-inter text-purple-200/80">
-              {hoveredGiftId
-                ? "✨ Click to open this memory gift!"
-                : `Select Gift #${activeGiftIndex + 1} waiting on the floating island ✨`}
-            </p>
-          </motion.div>
-        </AnimatePresence>
+        <div className="fixed bottom-20 inset-x-0 flex justify-center px-4">
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="glass-panel px-6 py-3.5 rounded-2xl border border-white/15 text-center max-w-md shadow-2xl"
+            >
+              <h2 className="text-lg sm:text-xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 to-amber-200 mb-0.5">
+                {birthdayConfig.narrative.scene4.title}
+              </h2>
+              <p className="text-xs sm:text-sm font-inter text-purple-200/80">
+                {hoveredGiftId
+                  ? "✨ Tap to open this gift!"
+                  : `Tap Gift #${activeGiftIndex + 1} waiting on the island ✨`}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
       )}
 
-      {/* Active Memory Modal / Story Card */}
+      {/* Active Memory Caption at bottom - positioned completely below 3D photo */}
       {revealingMemory && !isFlyingToSky && (
-        <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-          className="glass-panel p-6 rounded-3xl border border-amber-300/30 text-center max-w-lg shadow-[0_15px_50px_rgba(0,0,0,0.6)] pointer-events-auto mb-10"
-        >
-          <div className="flex items-center justify-center gap-1.5 text-xs text-amber-300 font-cinzel tracking-wider uppercase mb-1">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>{revealingMemory.date || "Cherished Memory"}</span>
-          </div>
-
-          <h3 className="text-2xl md:text-3xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-amber-200 to-purple-200 mb-2">
-            {revealingMemory.title}
-          </h3>
-
-          <p className="text-sm md:text-base font-cormorant italic text-purple-100 font-normal leading-relaxed mb-5 px-2">
-            "{revealingMemory.caption}"
-          </p>
-
-          <MagicalButton
-            id="continue-journey-btn"
-            variant="gold"
-            size="md"
-            onClick={onContinueJourney}
+        <div className="fixed bottom-20 inset-x-0 flex justify-center px-4 pointer-events-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 25, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="glass-panel p-4 sm:p-5 rounded-2xl border border-amber-300/30 text-center max-w-md w-full shadow-[0_15px_40px_rgba(0,0,0,0.6)]"
           >
-            {birthdayConfig.narrative.scene4.continueBtn}
-          </MagicalButton>
-        </motion.div>
-      )}
+            <div className="flex items-center justify-center gap-1.5 text-[11px] text-amber-300 font-cinzel tracking-wider uppercase mb-1">
+              <Sparkles className="w-3 h-3" />
+              <span>{revealingMemory.date || "Cherished Memory"}</span>
+            </div>
 
-      <div className="h-4" />
+            <h3 className="text-lg sm:text-2xl font-cinzel font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-amber-200 to-purple-200 mb-1">
+              {revealingMemory.title}
+            </h3>
+
+            <p className="text-xs sm:text-sm font-cormorant italic text-purple-100 font-normal leading-snug mb-3.5 px-1 line-clamp-2 sm:line-clamp-none">
+              "{revealingMemory.caption}"
+            </p>
+
+            <MagicalButton
+              id="continue-journey-btn"
+              variant="gold"
+              size="sm"
+              onClick={onContinueJourney}
+              className="w-full sm:w-auto"
+            >
+              {birthdayConfig.narrative.scene4.continueBtn}
+            </MagicalButton>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

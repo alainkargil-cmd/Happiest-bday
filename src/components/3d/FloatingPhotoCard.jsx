@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
 
@@ -14,6 +14,8 @@ export const FloatingPhotoCard = ({
 }) => {
   const cardGroup = useRef();
   const [texture, setTexture] = useState(null);
+  const { viewport } = useThree();
+  const isMobile = viewport.width < 5.5;
 
   useEffect(() => {
     if (!memory?.image) return;
@@ -28,7 +30,6 @@ export const FloatingPhotoCard = ({
       undefined,
       (err) => {
         console.warn("Could not load photo texture, creating fallback texture:", err);
-        // Fallback procedural canvas texture
         const canvas = document.createElement('canvas');
         canvas.width = 512;
         canvas.height = 700;
@@ -53,15 +54,19 @@ export const FloatingPhotoCard = ({
     if (isRevealed && cardGroup.current) {
       // Start inside box
       cardGroup.current.position.set(boxPosition[0], boxPosition[1] + 0.5, boxPosition[2]);
-      cardGroup.current.scale.set(0.1, 0.1, 0.1);
+      cardGroup.current.scale.set(0.05, 0.05, 0.05);
       cardGroup.current.rotation.set(0, 0, 0);
 
-      // Smoothly ascend and expand in front of camera
+      // Target position: positioned higher up in viewport so dialog at bottom NEVER covers it!
+      const targetY = isMobile ? 2.8 : 2.5;
+      const targetZ = isMobile ? 2.2 : 2.0;
+      const targetScale = isMobile ? 0.8 : 0.95;
+
       gsap.to(cardGroup.current.position, {
         x: 0,
-        y: 2.2,
-        z: 1.8,
-        duration: 2.2,
+        y: targetY,
+        z: targetZ,
+        duration: 2.0,
         ease: "power3.out",
         onComplete: () => {
           if (onRevealFinish) onRevealFinish();
@@ -69,14 +74,14 @@ export const FloatingPhotoCard = ({
       });
 
       gsap.to(cardGroup.current.scale, {
-        x: 1,
-        y: 1,
-        z: 1,
-        duration: 2.2,
+        x: targetScale,
+        y: targetScale,
+        z: targetScale,
+        duration: 2.0,
         ease: "back.out(1.2)"
       });
     }
-  }, [isRevealed, boxPosition, onRevealFinish]);
+  }, [isRevealed, boxPosition, isMobile, onRevealFinish]);
 
   useEffect(() => {
     if (isFlyingToSky && cardGroup.current) {
@@ -85,7 +90,7 @@ export const FloatingPhotoCard = ({
         x: skyTarget[0],
         y: skyTarget[1],
         z: skyTarget[2],
-        duration: 2.5,
+        duration: 2.2,
         ease: "power2.inOut",
         onComplete: () => {
           if (onFlyToSkyFinish) onFlyToSkyFinish();
@@ -96,13 +101,13 @@ export const FloatingPhotoCard = ({
         x: 0.45,
         y: 0.45,
         z: 0.45,
-        duration: 2.5,
+        duration: 2.2,
         ease: "power2.inOut"
       });
 
       gsap.to(cardGroup.current.rotation, {
         y: Math.PI * 2,
-        duration: 2.5,
+        duration: 2.2,
         ease: "power1.inOut"
       });
     }
@@ -111,10 +116,9 @@ export const FloatingPhotoCard = ({
   useFrame((state) => {
     if (isRevealed && !isFlyingToSky && cardGroup.current) {
       const t = state.clock.getElapsedTime();
-      // Gentle floating hover & slight tilt
-      cardGroup.current.position.y = 2.2 + Math.sin(t * 1.5) * 0.08;
-      cardGroup.current.rotation.y = Math.sin(t * 0.8) * 0.06;
-      cardGroup.current.rotation.z = Math.cos(t * 0.6) * 0.03;
+      const baseY = isMobile ? 2.8 : 2.5;
+      cardGroup.current.position.y = baseY + Math.sin(t * 1.5) * 0.06;
+      cardGroup.current.rotation.y = Math.sin(t * 0.8) * 0.05;
     }
   });
 
@@ -130,7 +134,7 @@ export const FloatingPhotoCard = ({
           metalness={0.8}
           roughness={0.2}
           emissive="#fbbf24"
-          emissiveIntensity={0.4}
+          emissiveIntensity={0.5}
         />
       </mesh>
 
@@ -159,9 +163,6 @@ export const FloatingPhotoCard = ({
         <planeGeometry args={[2.2, 0.25]} />
         <meshStandardMaterial color="#3b0764" roughness={0.4} />
       </mesh>
-
-      {/* Halo point light for card glow */}
-      <pointLight position={[0, 0, 0.6]} color="#fde047" intensity={2.5} distance={6} />
     </group>
   );
 };

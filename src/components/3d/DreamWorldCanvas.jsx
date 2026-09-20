@@ -10,55 +10,56 @@ import { Particles } from './Particles';
 import { Butterflies } from './Butterflies';
 import { Fireworks } from './Fireworks';
 
-// Smooth Cinematic Camera Controller
+// Smooth Cinematic Camera Controller with Mobile Adaptation
 function CameraDirector({ sceneId, selectedGiftId, isCakeWished, isFinale }) {
-  const { camera } = useThree();
+  const { camera, viewport } = useThree();
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
+  const isMobile = viewport.width < 5.5;
 
   useEffect(() => {
-    let targetPos = { x: 0, y: 0, z: 4.5 };
+    let targetPos = { x: 0, y: 0, z: isMobile ? 5.2 : 4.5 };
     let lookTarget = { x: 0, y: 0, z: 0 };
     let duration = 2.0;
 
     switch (sceneId) {
       case 1: // Intro Envelope
-        targetPos = { x: 0, y: 0, z: 4.2 };
+        targetPos = { x: 0, y: 0, z: isMobile ? 5.0 : 4.2 };
         lookTarget = { x: 0, y: 0, z: 0 };
         break;
       case 2: // Dream World Panorama
-        targetPos = { x: 0, y: 3.5, z: 15 };
+        targetPos = { x: 0, y: isMobile ? 4.0 : 3.5, z: isMobile ? 18 : 15 };
         lookTarget = { x: 0, y: 2, z: -10 };
         duration = 3.0;
         break;
       case 3: // Birthday Cake
         if (isCakeWished) {
-          targetPos = { x: 0, y: 2.2, z: 4.8 };
+          targetPos = { x: 0, y: isMobile ? 2.4 : 2.2, z: isMobile ? 5.8 : 4.8 };
           lookTarget = { x: 0, y: 1.5, z: 0 };
           duration = 1.8;
         } else {
-          targetPos = { x: 0, y: 2.0, z: 6.8 };
+          targetPos = { x: 0, y: isMobile ? 2.3 : 2.0, z: isMobile ? 8.2 : 6.8 };
           lookTarget = { x: 0, y: 1.2, z: 0 };
           duration = 2.2;
         }
         break;
       case 4: // Gift World
         if (selectedGiftId !== null) {
-          targetPos = { x: 0, y: 2.2, z: 5.2 };
-          lookTarget = { x: 0, y: 2.0, z: 0 };
+          targetPos = { x: 0, y: isMobile ? 2.6 : 2.2, z: isMobile ? 6.2 : 5.2 };
+          lookTarget = { x: 0, y: isMobile ? 2.3 : 2.0, z: 0 };
           duration = 1.8;
         } else {
-          targetPos = { x: 0, y: 3.2, z: 10.5 };
+          targetPos = { x: 0, y: isMobile ? 3.6 : 3.2, z: isMobile ? 13.0 : 10.5 };
           lookTarget = { x: 0, y: 1.0, z: 0 };
           duration = 2.2;
         }
         break;
       case 5: // Final Gift
-        targetPos = { x: 0, y: 2.8, z: 8.5 };
+        targetPos = { x: 0, y: isMobile ? 3.2 : 2.8, z: isMobile ? 10.5 : 8.5 };
         lookTarget = { x: 0, y: 1.8, z: 0 };
         duration = 2.5;
         break;
       case 6: // Finale
-        targetPos = { x: 0, y: 5.0, z: 15 };
+        targetPos = { x: 0, y: isMobile ? 5.5 : 5.0, z: isMobile ? 18 : 15 };
         lookTarget = { x: 0, y: 4.0, z: -6 };
         duration = 3.0;
         break;
@@ -81,7 +82,7 @@ function CameraDirector({ sceneId, selectedGiftId, isCakeWished, isFinale }) {
       duration: duration,
       ease: "power2.inOut"
     });
-  }, [sceneId, selectedGiftId, isCakeWished, isFinale, camera]);
+  }, [sceneId, selectedGiftId, isCakeWished, isFinale, isMobile, camera]);
 
   useFrame(() => {
     camera.lookAt(targetLookAt.current);
