@@ -11,7 +11,7 @@ export const birthdayConfig = {
   nickname: "Vyo",
   
   // Sender info (optional, leave empty if anonymous or customize as desired)
-  senderName: "With all my love & warmth 💖",
+  senderName: "With all the love and warmth 💖",
 
   // Audio configuration
   audio: {
